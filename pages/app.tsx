@@ -4,8 +4,11 @@ import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Fragment, useState } from "react";
 import Simulation from "@/components/Simulation";
+import { useScheduler } from "@/hooks/useScheduler";
+import { Interval } from "@/types/interval";
 
 const App: NextPage = () => {
+  const [intervals, setIntervals] = useState<Interval[]>([]);
   const {
     register,
     handleSubmit,
@@ -22,6 +25,7 @@ const App: NextPage = () => {
       processes: [],
     },
   });
+  const { start } = useScheduler(getValues());
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const closeModal = () => setIsModalOpen(false);
@@ -36,6 +40,7 @@ const App: NextPage = () => {
   let processes = watch("processes");
 
   const onSubmit: SubmitHandler<Config> = (data) => {
+    setIntervals(start());
     setIsModalOpen(true);
   };
 
@@ -192,7 +197,7 @@ const App: NextPage = () => {
               ✕
             </button>
           </div>
-          {getValues().processes?.length && <Simulation config={getValues()} />}
+          {getValues().processes?.length && <Simulation config={getValues()} intervals={intervals} />}
         </div>
       </div>
     </div>

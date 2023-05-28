@@ -86,24 +86,29 @@ export const simulateRR = (config: Config): Interval[] => {
     // Receive processes
     while (i < processes.length && processes[i].arrivalTime === time) {
       let nextProcess = processes[i];
-      heap.push({ ...nextProcess });
+      heap.push({ ...nextProcess, arrivalTime: 0 });
       i++;
     }
+    console.log(heap.peek(), quantumRemaining);
     // Generate timestamps
     const runningProcess = heap.peek();
     if (runningProcess) {
       timestamps.push({ time, process: { ...runningProcess } });
       runningProcess.burstTime -= 1;
       quantumRemaining -= 1;
-      if (runningProcess.burstTime <= 0) heap.pop();
+      if (runningProcess.burstTime <= 0) {
+        heap.pop();
+        quantumRemaining = config.quantum;
+      }
       else if (quantumRemaining <= 0) {
         const reInserted = heap.pop()!;
-        reInserted.arrivalTime = time;
+        reInserted.arrivalTime = 0;
         heap.push(reInserted);
         quantumRemaining = config.quantum;
       }
     } else if (i < processes.length) {
       timestamps.push({ time });
+      quantumRemaining = config.quantum;
     } else {
       break;
     }
