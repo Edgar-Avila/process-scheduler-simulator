@@ -5,10 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Fragment, useState } from "react";
 import Simulation from "@/components/Simulation";
 import { useScheduler } from "@/hooks/useScheduler";
-import { Interval } from "@/types/interval";
+import { Timestamp } from "@/types/timestamp";
 
 const App: NextPage = () => {
-  const [intervals, setIntervals] = useState<Interval[]>([]);
+  const [timestamps, setTimestamps] = useState<Timestamp[]>([]);
   const {
     register,
     handleSubmit,
@@ -21,6 +21,7 @@ const App: NextPage = () => {
     defaultValues: {
       algorithm: "FCFS",
       quantum: 4,
+      mode: "ALL",
       processes: [],
     },
   });
@@ -36,9 +37,10 @@ const App: NextPage = () => {
 
   let algorithm = watch("algorithm");
   let processes = watch("processes");
+  let mode = watch("mode");
 
   const onSubmit: SubmitHandler<Config> = (data) => {
-    setIntervals(start());
+    setTimestamps(start());
     setIsModalOpen(true);
   };
 
@@ -65,6 +67,23 @@ const App: NextPage = () => {
           {errors.algorithm && (
             <small className="text-error label-text-alt">
               {errors.algorithm.message}
+            </small>
+          )}
+        </div>
+        <div className="form-group w-full">
+          <label className="label">Mode</label>
+          <select
+            className={`select select-bordered w-full ${
+              errors.mode ? "select-error" : ""
+            }`}
+            {...register("mode")}
+          >
+            <option value="ALL">All at once</option>
+            <option value="STEP">Step by step</option>
+          </select>
+          {errors.mode && (
+            <small className="text-error label-text-alt">
+              {errors.mode.message}
             </small>
           )}
         </div>
@@ -201,7 +220,7 @@ const App: NextPage = () => {
             </button>
           </div>
           {getValues().processes?.length && (
-            <Simulation config={getValues()} intervals={intervals} />
+            <Simulation config={getValues()} timestamps={timestamps} mode={mode}/>
           )}
         </div>
       </div>

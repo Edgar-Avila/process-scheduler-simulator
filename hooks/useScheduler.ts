@@ -1,11 +1,9 @@
 import { Config } from "@/types/config";
-import { Interval } from "@/types/interval";
 import { Process } from "@/types/process";
 import { Timestamp } from "@/types/timestamp";
-import { timestampsToIntervals } from "@/utils/mapper";
 import Heap from "heap";
 
-export const simulateFCFS = (config: Config): Interval[] => {
+export const simulateFCFS = (config: Config): Timestamp[] => {
   const processes = config.processes.map((a) => {
     return { ...a };
   });
@@ -34,11 +32,10 @@ export const simulateFCFS = (config: Config): Interval[] => {
     }
     time += 1;
   }
-  const intervals = timestampsToIntervals(timestamps);
-  return intervals;
+  return timestamps
 };
 
-export const simulateSJF = (config: Config): Interval[] => {
+export const simulateSJF = (config: Config): Timestamp[] => {
   const processes = config.processes.map((a) => {
     return { ...a };
   });
@@ -67,11 +64,10 @@ export const simulateSJF = (config: Config): Interval[] => {
     }
     time += 1;
   }
-  const intervals = timestampsToIntervals(timestamps);
-  return intervals;
+  return timestamps;
 };
 
-export const simulateRR = (config: Config): Interval[] => {
+export const simulateRR = (config: Config): Timestamp[] => {
   if (!config.quantum) return [];
   const processes = config.processes.map((a) => {
     return { ...a };
@@ -113,11 +109,10 @@ export const simulateRR = (config: Config): Interval[] => {
     }
     time += 1;
   }
-  const intervals = timestampsToIntervals(timestamps);
-  return intervals;
+  return timestamps;
 };
 
-export const simulatePS = (config: Config): Interval[] => {
+export const simulatePS = (config: Config): Timestamp[] => {
   const processes = config.processes.map((a) => {
     return { ...a };
   });
@@ -146,9 +141,9 @@ export const simulatePS = (config: Config): Interval[] => {
     }
     time += 1;
   }
-  const intervals = timestampsToIntervals(timestamps);
-  return intervals;
+  return timestamps;
 };
+
 export const useScheduler = (config: Config) => {
   let start = () => simulateFCFS(config);
   if (config.algorithm === "SJF") start = () => simulateSJF(config);
