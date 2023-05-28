@@ -89,7 +89,6 @@ export const simulateRR = (config: Config): Interval[] => {
       heap.push({ ...nextProcess, arrivalTime: 0 });
       i++;
     }
-    console.log(heap.peek(), quantumRemaining);
     // Generate timestamps
     const runningProcess = heap.peek();
     if (runningProcess) {
@@ -118,40 +117,42 @@ export const simulateRR = (config: Config): Interval[] => {
   return intervals;
 };
 
-export const _simulateRR = (config: Config): Interval[] => {
-  if (!config.quantum) return [];
-  const intervals: Interval[] = [];
+export const simulatePS = (config: Config): Interval[] => {
   const processes = config.processes.map((a) => {
     return { ...a };
   });
+  const heap = new Heap<Process>((a, b) => b.priority - a.priority);
   processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+  const timestamps: Timestamp[] = [];
   let time = 0;
+  let i = 0;
   while (true) {
-    let done = true;
-    for (let el of processes) {
-      if (el.arrivalTime > time) {
-        // intervals.push({ startTime: time, duration: el.arrivalTime - time });
-        // time = el.arrivalTime;
-        continue;
-      }
-      const timeTaken = Math.min(config.quantum, el.burstTime);
-      intervals.push({
-        process: { ...el },
-        startTime: time,
-        duration: timeTaken,
-      });
-      el.burstTime -= timeTaken;
-      time += timeTaken;
-      if (el.burstTime > 0) done = false;
+    // Receive processes
+    while (i < processes.length && processes[i].arrivalTime === time) {
+      let nextProcess = processes[i];
+      heap.push({ ...nextProcess });
+      i++;
     }
-    if (done) break;
+    // Generate timestamps
+    const runningProcess = heap.peek();
+    if (runningProcess) {
+      timestamps.push({ time, process: { ...runningProcess } });
+      runningProcess.burstTime -= 1;
+      if (runningProcess.burstTime <= 0) heap.pop();
+    } else if (i < processes.length) {
+      timestamps.push({ time });
+    } else {
+      break;
+    }
+    time += 1;
   }
+  const intervals = timestampsToIntervals(timestamps);
   return intervals;
 };
-
 export const useScheduler = (config: Config) => {
   let start = () => simulateFCFS(config);
   if (config.algorithm === "SJF") start = () => simulateSJF(config);
   if (config.algorithm === "RR") start = () => simulateRR(config);
+  if (config.algorithm === "PS") start = () => simulatePS(config);
   return { start };
 };

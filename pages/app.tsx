@@ -62,6 +62,7 @@ const App: NextPage = () => {
             <option value="FCFS">First Come First Served</option>
             <option value="SJF">Shortest Job First</option>
             <option value="RR">Round Robin</option>
+            <option value="PS">Priority Scheduling</option>
           </select>
           {errors.algorithm && (
             <small className="text-error label-text-alt">
@@ -119,6 +120,7 @@ const App: NextPage = () => {
                   id: processes.length,
                   burstTime: 1,
                   arrivalTime: 0,
+                  priority: 1,
                 })
               }
             >
@@ -134,10 +136,19 @@ const App: NextPage = () => {
           </div>
         </div>
 
-        <div className={`grid gap-2 sm:gap-4 grid-cols-[4rem_1fr_1fr]`}>
+        <div
+          className={`grid gap-2 sm:gap-4 ${
+            algorithm === "PS"
+              ? "grid-cols-[4rem_1fr_1fr_1fr]"
+              : "grid-cols-[4rem_1fr_1fr]"
+          }`}
+        >
           <span className="text-center">Id</span>
           <span className="text-center">Arrival Time</span>
           <span className="text-center">Burst Time</span>
+          {algorithm === "PS" && (
+            <span className="text-center">Priority</span>
+          )}
           {fields.map((field, index) => (
             <Fragment key={field.id}>
               <input
@@ -169,6 +180,18 @@ const App: NextPage = () => {
                   setValueAs: (v) => (v === "" ? undefined : parseInt(v, 10)),
                 })}
               />
+              {algorithm === "PS" && (
+                <input
+                  type="number"
+                  min={1}
+                  className={`input input-bordered min-w-0 ${
+                    errors.processes?.[index]?.priority ? "input-error" : ""
+                  }`}
+                  {...register(`processes.${index}.priority`, {
+                    setValueAs: (v) => (v === "" ? undefined : parseInt(v, 10)),
+                  })}
+                />
+              )}
             </Fragment>
           ))}
         </div>
@@ -197,7 +220,9 @@ const App: NextPage = () => {
               ✕
             </button>
           </div>
-          {getValues().processes?.length && <Simulation config={getValues()} intervals={intervals} />}
+          {getValues().processes?.length && (
+            <Simulation config={getValues()} intervals={intervals} />
+          )}
         </div>
       </div>
     </div>
