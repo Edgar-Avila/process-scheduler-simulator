@@ -13,6 +13,7 @@ const App: NextPage = () => {
     register,
     handleSubmit,
     watch,
+    setError,
     getValues,
     control,
     formState: { errors },
@@ -40,6 +41,11 @@ const App: NextPage = () => {
   let mode = watch("mode");
 
   const onSubmit: SubmitHandler<Config> = (data) => {
+    console.log(data.quantum)
+    if (data.algorithm === "RR" && !data.quantum) {
+      setError("quantum", { message: "Quantum is required" });
+      return;
+    }
     setTimestamps(start());
     setIsModalOpen(true);
   };
@@ -92,7 +98,7 @@ const App: NextPage = () => {
             <label className="label">Quantum</label>
             <input
               type="number"
-              min="1"
+              min={1}
               className={`input input-bordered w-full ${
                 errors.quantum ? "input-error" : ""
               }`}
@@ -145,9 +151,7 @@ const App: NextPage = () => {
           <span className="text-center">Id</span>
           <span className="text-center">Arrival Time</span>
           <span className="text-center">Burst Time</span>
-          {algorithm === "PS" && (
-            <span className="text-center">Priority</span>
-          )}
+          {algorithm === "PS" && <span className="text-center">Priority</span>}
           {fields.map((field, index) => (
             <Fragment key={field.id}>
               <input
@@ -220,7 +224,11 @@ const App: NextPage = () => {
             </button>
           </div>
           {getValues().processes?.length && (
-            <Simulation config={getValues()} timestamps={timestamps} mode={mode}/>
+            <Simulation
+              config={getValues()}
+              timestamps={timestamps}
+              mode={mode}
+            />
           )}
         </div>
       </div>
