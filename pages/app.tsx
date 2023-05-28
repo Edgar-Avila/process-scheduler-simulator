@@ -20,7 +20,6 @@ const App: NextPage = () => {
     resolver: zodResolver(ConfigSchema),
     defaultValues: {
       algorithm: "FCFS",
-      burstTime: 100,
       quantum: 4,
       processes: [],
     },
@@ -36,7 +35,6 @@ const App: NextPage = () => {
   });
 
   let algorithm = watch("algorithm");
-  let burstTime = watch("burstTime");
   let processes = watch("processes");
 
   const onSubmit: SubmitHandler<Config> = (data) => {
@@ -67,24 +65,6 @@ const App: NextPage = () => {
           {errors.algorithm && (
             <small className="text-error label-text-alt">
               {errors.algorithm.message}
-            </small>
-          )}
-        </div>
-        <div className="form-group w-full">
-          <label className="label">Burst Time Duration (ms)</label>
-          <input
-            type="number"
-            placeholder="Burst time (ms)"
-            className={`input input-bordered w-full ${
-              errors.burstTime ? "input-error" : ""
-            }`}
-            {...register("burstTime", {
-              setValueAs: (v) => (v === "" ? undefined : parseInt(v, 10)),
-            })}
-          />
-          {errors.burstTime && (
-            <small className="text-error label-text-alt">
-              {errors.burstTime.message}
             </small>
           )}
         </div>
