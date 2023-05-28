@@ -2,7 +2,7 @@ import { z } from "zod";
 import { ProcessSchema } from "./process";
 
 export const TimestampSchema = z.object({
-  process: ProcessSchema,
+  process: ProcessSchema.optional(),
   time: z.number().int().positive(),
 });
 

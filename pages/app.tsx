@@ -18,6 +18,7 @@ const App: NextPage = () => {
     defaultValues: {
       algorithm: "FCFS",
       burstTime: 100,
+      quantum: 4,
       processes: [],
     },
   });
@@ -68,7 +69,9 @@ const App: NextPage = () => {
           <input
             type="number"
             placeholder="Burst time (ms)"
-            className={`input input-bordered w-full ${errors.burstTime ? "input-error" : ""}`}
+            className={`input input-bordered w-full ${
+              errors.burstTime ? "input-error" : ""
+            }`}
             {...register("burstTime", {
               setValueAs: (v) => (v === "" ? undefined : parseInt(v, 10)),
             })}
@@ -79,6 +82,26 @@ const App: NextPage = () => {
             </small>
           )}
         </div>
+        {algorithm === "RR" && (
+          <div className="form-group w-full">
+            <label className="label">Quantum</label>
+            <input
+              type="number"
+              min="1"
+              className={`input input-bordered w-full ${
+                errors.quantum ? "input-error" : ""
+              }`}
+              {...register(`quantum`, {
+                setValueAs: (v) => (v === "" ? undefined : parseInt(v, 10)),
+              })}
+            />
+            {errors.quantum && (
+              <small className="text-error label-text-alt">
+                {errors.quantum.message}
+              </small>
+            )}
+          </div>
+        )}
 
         <div className="flex justify-between items-center">
           <h3 className="font-bold">Processes</h3>
@@ -91,7 +114,6 @@ const App: NextPage = () => {
                   id: processes.length,
                   burstTime: 1,
                   arrivalTime: 0,
-                  quantum: 1,
                 })
               }
             >
@@ -107,17 +129,10 @@ const App: NextPage = () => {
           </div>
         </div>
 
-        <div
-          className={`grid gap-2 sm:gap-4 ${
-            algorithm === "RR"
-              ? "grid-cols-[4rem_1fr_1fr_1fr]"
-              : "grid-cols-[4rem_1fr_1fr]"
-          }`}
-        >
+        <div className={`grid gap-2 sm:gap-4 grid-cols-[4rem_1fr_1fr]`}>
           <span className="text-center">Id</span>
           <span className="text-center">Arrival Time</span>
           <span className="text-center">Burst Time</span>
-          {algorithm === "RR" && <span className="text-center">Quantum</span>}
           {fields.map((field, index) => (
             <Fragment key={field.id}>
               <input
@@ -130,6 +145,8 @@ const App: NextPage = () => {
                 })}
               />
               <input
+                type="number"
+                min={0}
                 className={`input input-bordered min-w-0 ${
                   errors.processes?.[index]?.arrivalTime ? "input-error" : ""
                 }`}
@@ -138,6 +155,8 @@ const App: NextPage = () => {
                 })}
               />
               <input
+                type="number"
+                min={1}
                 className={`input input-bordered min-w-0 ${
                   errors.processes?.[index]?.burstTime ? "input-error" : ""
                 }`}
@@ -145,20 +164,12 @@ const App: NextPage = () => {
                   setValueAs: (v) => (v === "" ? undefined : parseInt(v, 10)),
                 })}
               />
-              {algorithm === "RR" && (
-                <input
-                  className={`input input-bordered min-w-0 ${
-                    errors.processes?.[index]?.quantum ? "input-error" : ""
-                  }`}
-                  {...register(`processes.${index}.quantum`, {
-                    setValueAs: (v) => (v === "" ? undefined : parseInt(v, 10)),
-                  })}
-                />
-              )}
             </Fragment>
           ))}
         </div>
-        {errors.processes && <span className="text-error">{errors.processes.message}</span>}
+        {errors.processes && (
+          <span className="text-error">{errors.processes.message}</span>
+        )}
         <button className="btn btn-primary">Start Simulation</button>
       </form>
 
@@ -171,11 +182,9 @@ const App: NextPage = () => {
         readOnly
       />
       <div className="modal">
-        <div className="modal-box">
+        <div className="modal-box max-w-5xl">
           <div className="flex justify-between gap-2">
-            <h3 className="text-lg font-bold">
-              Scheduler
-            </h3>
+            <h3 className="text-lg font-bold">Scheduler</h3>
             <button
               className="btn btn-sm btn-circle"
               onClick={() => closeModal()}
@@ -183,9 +192,7 @@ const App: NextPage = () => {
               ✕
             </button>
           </div>
-          { getValues().processes?.length &&
-            <Simulation config={getValues()}/>
-          }
+          {getValues().processes?.length && <Simulation config={getValues()} />}
         </div>
       </div>
     </div>

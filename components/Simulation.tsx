@@ -1,4 +1,4 @@
-import { useMapper } from "@/hooks/useMapper";
+import { intervalToDataset } from "@/utils/mapper";
 import { useScheduler } from "@/hooks/useScheduler";
 import { Config } from "@/types/config";
 import { ChartData, ChartOptions } from "chart.js";
@@ -11,7 +11,6 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 const Simulation: React.FC<Props> = ({ config, ...props }) => {
   const { start } = useScheduler(config);
-  const { intervalToDataset } = useMapper();
   const intervals = start();
 
   const datasets = intervals.map(intervalToDataset);
@@ -20,6 +19,7 @@ const Simulation: React.FC<Props> = ({ config, ...props }) => {
 
   const options: ChartOptions<"bar"> = {
     responsive: true,
+    maintainAspectRatio: false,
     indexAxis: "y",
     scales: {
       x: { stacked: true },
@@ -31,7 +31,7 @@ const Simulation: React.FC<Props> = ({ config, ...props }) => {
     },
   };
   return (
-    <div {...props}>
+    <div className="relative" {...props}>
       <Bar data={data} options={options} />
     </div>
   );
