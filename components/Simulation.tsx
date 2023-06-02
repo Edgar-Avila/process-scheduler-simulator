@@ -5,16 +5,19 @@ import { Bar } from "react-chartjs-2";
 import { Timestamp } from "@/types/timestamp";
 import { useEffect, useMemo, useState } from "react";
 import { Interval } from "@/types/interval";
+import { Process } from "@/types/process";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   config: Config;
   timestamps: Timestamp[];
+  processes: Process[];
   mode: Mode;
 }
 
 const Simulation: React.FC<Props> = ({
   config,
   timestamps,
+  processes,
   mode,
   ...props
 }) => {
@@ -31,6 +34,35 @@ const Simulation: React.FC<Props> = ({
       labels: ["Execution"],
       datasets: intervals.map(intervalToDataset),
     };
+  }, [current, timestamps]);
+
+  const averageWaitTime = useMemo<number>(() => {
+    let intervals: Interval[] = [];
+    if (mode === "STEP") {
+      intervals = timestampsToIntervals(timestamps.slice(0, current + 1));
+    } else {
+      intervals = timestampsToIntervals(timestamps);
+    }
+
+    const set = new Set();
+    let avg = 0;
+
+    intervals.reverse();
+
+    for(let interval of intervals) {
+      if(!interval.process) continue;
+      if(set.has(interval.process.id)) {
+        avg -= interval.duration;
+      }
+      else {
+        avg += interval.startTime;
+        set.add(interval.process.id);
+      }
+    }
+
+    avg /= set.size;
+
+    return avg;
   }, [current, timestamps]);
 
   useEffect(() => {
@@ -55,6 +87,11 @@ const Simulation: React.FC<Props> = ({
       <div className="relative" {...props}>
         <Bar data={data} options={options} />
       </div>
+      <div className="text-center">
+        <div className="tooltip" data-tip="For each process, add the last interval start time and substract the sum of its interval durations except the last. Lastly divide by the amount of processes">
+          &#9432; Average Wait Time: {averageWaitTime.toFixed(2)}
+        </div>
+      </div>
       {mode === "STEP" && (
         <>
           <div className="text-right">Time: {current}</div>
@@ -75,6 +112,24 @@ const Simulation: React.FC<Props> = ({
             >
               Next
             </button>
+          </div>
+          <div className="text-center mt-1 font-bold">
+            {processes.map((process) => (
+              <>
+                {process.arrivalTime === current && (
+                  <div>Process {process.id} arrives</div>
+                )}
+              </>
+            ))}
+            {timestamps[current].process && (
+              <>
+                {current > 0 &&
+                  timestamps[current].process?.id !=
+                    timestamps[current - 1].process?.id && (
+                    <div>Process {timestamps[current].process?.id} starts</div>
+                  )}
+              </>
+            )}
           </div>
         </>
       )}

@@ -227,6 +227,7 @@ const App: NextPage = () => {
             <Simulation
               config={getValues()}
               timestamps={timestamps}
+              processes={processes}
               mode={mode}
             />
           )}

@@ -36,10 +36,11 @@ export const simulateFCFS = (config: Config): Timestamp[] => {
 };
 
 export const simulateSJF = (config: Config): Timestamp[] => {
+  // In the others we use burstTime as remaining time, here we want to separate them
   const processes = config.processes.map((a) => {
-    return { ...a };
+    return { ...a, remainingTime: a.burstTime };
   });
-  const heap = new Heap<Process>((a, b) => a.burstTime - b.burstTime);
+  const heap = new Heap<Process & { remainingTime: number }>((a, b) => a.burstTime - b.burstTime);
   processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
   const timestamps: Timestamp[] = [];
   let time = 0;
@@ -55,8 +56,8 @@ export const simulateSJF = (config: Config): Timestamp[] => {
     const runningProcess = heap.peek();
     if (runningProcess) {
       timestamps.push({ time, process: { ...runningProcess } });
-      runningProcess.burstTime -= 1;
-      if (runningProcess.burstTime <= 0) heap.pop();
+      runningProcess.remainingTime -= 1;
+      if (runningProcess.remainingTime <= 0) heap.pop();
     } else if (i < processes.length) {
       timestamps.push({ time });
     } else {
