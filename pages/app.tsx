@@ -41,7 +41,6 @@ const App: NextPage = () => {
   let mode = watch("mode");
 
   const onSubmit: SubmitHandler<Config> = (data) => {
-    console.log(data.quantum)
     if (data.algorithm === "RR" && !data.quantum) {
       setError("quantum", { message: "Quantum is required" });
       return;
@@ -202,6 +201,7 @@ const App: NextPage = () => {
           <span className="text-error">{errors.processes.message}</span>
         )}
         <button className="btn btn-primary">Start Simulation</button>
+        {algorithm === "PS" && <div className="text-sm text-center"><b>Important:</b> Lowest priority comes first</div>}
       </form>
 
       {/* Modal */}

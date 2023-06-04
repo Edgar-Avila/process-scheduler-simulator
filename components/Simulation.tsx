@@ -3,7 +3,7 @@ import { Config, Mode } from "@/types/config";
 import { ChartData, ChartDataset, ChartOptions } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import { Timestamp } from "@/types/timestamp";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { Interval } from "@/types/interval";
 import { Process } from "@/types/process";
 
@@ -114,12 +114,12 @@ const Simulation: React.FC<Props> = ({
             </button>
           </div>
           <div className="text-center mt-1 font-bold">
-            {processes.map((process) => (
-              <>
+            {processes.map((process, i) => (
+              <Fragment key={i}>
                 {process.arrivalTime === current && (
                   <div>Process {process.id} arrives</div>
                 )}
-              </>
+              </Fragment>
             ))}
             {timestamps[current].process && (
               <>
