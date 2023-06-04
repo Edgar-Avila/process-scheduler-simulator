@@ -121,7 +121,7 @@ const Simulation: React.FC<Props> = ({
                 )}
               </Fragment>
             ))}
-            {timestamps[current].process && (
+            {timestamps[current]?.process && (
               <>
                 {current > 0 &&
                   timestamps[current].process?.id !=
